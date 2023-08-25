@@ -3,12 +3,15 @@
 import type { DirectionsResponseData, FindPlaceFromTextResponseData } from "@googlemaps/google-maps-services-js"
 import { FormEvent, useRef, useState } from "react"
 import { useMap } from "../hooks/useMap"
+import Grid2 from "@mui/material/Unstable_Grid2/Grid2"
+import { Alert, Button, Card, CardActions, CardContent, List, ListItem, ListItemText, Snackbar, TextField, Typography } from "@mui/material"
 
 export default function NewRoutePage() {
   const mapContainerRef = useRef<HTMLDivElement>(null)
   const map = useMap(mapContainerRef)
   const [directionsData, setDirectionsData] = useState<
     DirectionsResponseData & { request: any }>()
+  const [open, setOpen] = useState(false)
 
   async function searchPlace(event: FormEvent) {
     event.preventDefault()
@@ -16,8 +19,8 @@ export default function NewRoutePage() {
     const destination = (document.getElementById("destination") as HTMLInputElement).value
 
     const [sourceResponse, destinationResponse] = await Promise.all([
-      fetch(`http://localhost:3000/places?text=${source}`),
-      fetch(`http://localhost:3000/places?text=${destination}`)
+      fetch(`http://localhost:3001/api/places?text=${source}`),
+      fetch(`http://localhost:3001/api/places?text=${destination}`)
     ])
 
     const [sourcePlace, destinationPlace]: FindPlaceFromTextResponseData[] = await Promise.all([
@@ -41,7 +44,7 @@ export default function NewRoutePage() {
     const placeDestinationId = destinationPlace.candidates[0].place_id
 
     const directionsResponse = await fetch(
-      `http://localhost:3000/directions?originId=${placeSourceId}&destinationId=${placeDestinationId}`
+      `http://localhost:3001/api/directions?originId=${placeSourceId}&destinationId=${placeDestinationId}`
     )
     const directionsData: DirectionsResponseData & { request: any } =
       await directionsResponse.json()
@@ -66,7 +69,7 @@ export default function NewRoutePage() {
     const startAddress = directionsData!.routes[0].legs[0].start_address
     const endAddress = directionsData!.routes[0].legs[0].end_address
 
-    const response = await fetch("http://localhost:3000/routes", {
+    const response = await fetch("http://localhost:3001/api/routes", {
       method: "POST",
       headers: {
         "Content-type": "application/json"
@@ -78,52 +81,77 @@ export default function NewRoutePage() {
       })
     })
     const route = await response.json()
+    setOpen(true)
+
     return route
   }
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "row",
-        height: "100%",
-        width: "100%"
-      }}>
-      <div>
-        <h1>Nova Rota</h1>
+    <Grid2
+      container sx={{ display: "flex", flex: 1 }}
+    >
+      <Grid2 xs={4} px={2}>
+        <Typography variant="h4">Nova Rota</Typography>
         <form
-          style={{ display: "flex", flexDirection: "column"}}
           onSubmit={searchPlace}
         >
-          <div>
-            <input id="source" type="text" placeholder="origem" />
-          </div>
-          <div>
-            <input id="destination" type="text" placeholder="destino" />
-          </div>
-          <button type="submit">Pesquisar</button>
+          <TextField id="source" placeholder="Origem" fullWidth/>
+          <TextField
+            id="destination"
+            placeholder="Destino"
+            sx={{ mt: 1}}
+            fullWidth
+          />
+
+          <Button
+            variant="contained"
+            type="submit"
+            sx={{ mt: 1}}
+            fullWidth
+          >Pesquisar</Button>
         </form>
         {
           directionsData && (
-            <ul>
-              <li>Origem {directionsData.routes[0].legs[0].start_address}</li>
-              <li>Destino {directionsData.routes[0].legs[0].end_address}</li>
-              <li>
-                <button onClick={createRoute}></button>
-              </li>
-            </ul>
+            <Card sx={{ mt: 1}}>
+              <CardContent>
+                <List>
+                  <ListItem>
+                    <ListItemText
+                      primary={"Origem"}
+                      secondary={
+                        directionsData.routes[0].legs[0].start_address
+                      }
+                    />
+                  </ListItem>
+                  <ListItem>
+                    <ListItemText
+                      primary={"Destino"}
+                      secondary={
+                        directionsData.routes[0].legs[0].end_address
+                      }
+                    />
+                  </ListItem>
+                </List>
+              </CardContent>
+              <CardActions sx={{ display: "flex", justifyContent: "center"}}>
+                <Button type="button" variant="contained" onClick={createRoute}>
+                  Adicionar rota
+                </Button>
+              </CardActions>
+            </Card>
           )
         }
-      </div>
-      <div id="map"
-        style={{
-          height: "100%",
-          width: "100%",
-        }}
-        ref={mapContainerRef}
+      </Grid2>
+      <Grid2 id="map" ref={mapContainerRef} xs={8}></Grid2>
+      <Snackbar
+        open={open}
+        autoHideDuration={3000}
+        onClose={() => setOpen(false)}
       >
-
-      </div>
-    </div>
+        <Alert onClose={() => setOpen(false)} security="success">
+          Rata cadastrada com sucesso
+        </Alert>
+      </Snackbar>
+    </Grid2>
   )
 }
