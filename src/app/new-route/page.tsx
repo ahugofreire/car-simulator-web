@@ -19,8 +19,8 @@ export default function NewRoutePage() {
     const destination = (document.getElementById("destination") as HTMLInputElement).value
 
     const [sourceResponse, destinationResponse] = await Promise.all([
-      fetch(`http://localhost:3001/api/places?text=${source}`),
-      fetch(`http://localhost:3001/api/places?text=${destination}`)
+      fetch(`${process.env.NEXT_PUBLIC_NEXT_API_URL}/places?text=${source}`),
+      fetch(`${process.env.NEXT_PUBLIC_NEXT_API_URL}/places?text=${destination}`)
     ])
 
     const [sourcePlace, destinationPlace]: FindPlaceFromTextResponseData[] = await Promise.all([
@@ -44,7 +44,7 @@ export default function NewRoutePage() {
     const placeDestinationId = destinationPlace.candidates[0].place_id
 
     const directionsResponse = await fetch(
-      `http://localhost:3001/api/directions?originId=${placeSourceId}&destinationId=${placeDestinationId}`
+      `${process.env.NEXT_PUBLIC_NEXT_API_URL}/directions?originId=${placeSourceId}&destinationId=${placeDestinationId}`
     )
     const directionsData: DirectionsResponseData & { request: any } =
       await directionsResponse.json()

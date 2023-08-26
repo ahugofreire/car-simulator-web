@@ -15,8 +15,9 @@ export default function AdminPage() {
     socket.on(
       "admin-new-points",
       async (data: { route_id: string; lat: number; lng: number}) => {
+        console.log("aqui")
         if (!map?.hasRoute(data.route_id)) {
-          const response = await fetch(`http://localhost:3001/api/routes/${data.route_id}`)
+          const response = await fetch(`${process.env.NEXT_PUBLIC_NEXT_API_URL}/routes/${data.route_id}`)
           const route: Route = await response.json()
 
           map?.removeAllRoutes()

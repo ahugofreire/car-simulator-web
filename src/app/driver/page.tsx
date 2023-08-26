@@ -21,7 +21,7 @@ export default function DriverPage() {
 
   async function startRoute() {
     const routeId = (document.getElementById("route") as HTMLSelectElement).value
-    const response = await fetch(`http://localhost:30001/api/routes/${routeId}`)
+    const response = await fetch(`${process.env.NEXT_PUBLIC_NEXT_API_URL}/routes/${routeId}`)
     const route: Route = await response.json();
 
     map?.removeAllRoutes()

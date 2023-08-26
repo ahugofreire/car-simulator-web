@@ -7,3 +7,10 @@ services:
       - "3001:3000"
     volumes:
       - .:/home/node/app
+    networks:
+      - network1
+
+networks:
+  network1:
+    name: car-simulator-kafka_internal-kafka-network
+    external: true

@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
 
-  const response = await fetch(`http://host.docker.internal:3000/routes`, {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_NEST_API_URL}/routes`, {
     next: {
       revalidate: 60,
       tags: ["routes"],
@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
 
-  const response = await fetch(`http://host.docker.internal:3000/routes`, {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_NEST_API_URL}/routes`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
